@@ -68,6 +68,7 @@ def game(party)
         heal_party(party)
     when "3"
         #bury dead people
+        bury_dead(party)
     when "4"
         #fight troll
     when "5"
@@ -107,12 +108,13 @@ end
 def view_party(party)
     clear_screen
     #puts "#{party.name.titlecase}:"
+
     party.party_members.each { |member|
         dead = ""
         if !member.alive
-            dead = "*DEAD*"
+            dead = "\t*DEAD*"
         end
-        puts "#{member.name}\t\tLevel #{member.level} #{member.dnd_class.name.capitalize}\t\tHP: #{member.current_hp}/#{member.max_hp} #{dead}"
+        puts "#{tabation(member.name)}Level #{member.level} #{member.dnd_class.name.capitalize}\t\t\tHP: #{member.current_hp}/#{member.max_hp} #{dead}"
     }
     print "\n\nPress #{localization} to return to menu. "
     gets.chomp
@@ -120,10 +122,15 @@ def view_party(party)
     game(party)
 end
 
+
 def heal_party(party)
     if party_has_cleric?(party)
         party.party_members.each { |member|
-            member.current_hp = member.max_hp
+            if member.alive
+                member.current_hp = member.max_hp
+            else
+                puts "hey .. ummm #{member.name} is dead... should we bury them??"
+            end
         }
         clear_screen
         message = Spell.find_by(name: "Mass Cure Wounds").description
@@ -139,9 +146,31 @@ end
 
 def party_has_cleric?(party)
     party.party_members.any? { |member|
-        member.dnd_class == DndClass.find_by(name: "cleric")
+        member.dnd_class == DndClass.find_by(name: "cleric") && member.alive
     }
 end
+
+def bury_dead(party)
+    clear_screen
+    puts "Sorry for your loss... get good scrub\n\n"
+    puts "please enter name of dead party member you wish to bury:\n"
+    response = gets.chomp
+    dead_memeber = party.party_members.find_by(name: response)
+
+
+    if !dead_memeber.alive
+        dead_memeber.destroy()
+        puts "sad song ... \n\n"
+    else
+        clear_screen
+        puts "this person is not dead yet you sick ..... yeah\n\n"
+
+    end
+
+    game(party)
+
+end
+
 
 def clear_screen
     if Gem.win_platform?
@@ -157,5 +186,15 @@ def localization
     else
         "'return'"
     end  
+end
+
+def tabation(name)
+
+    if name.size < 8 
+        return "#{name}\t\t\t"
+    else
+        return "#{name}\t\t"
+    end
+
 end
 

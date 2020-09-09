@@ -14,4 +14,20 @@ require_relative "cli.rb"
 
 puts "HELLO WORLD"
 
+###########delete me ######
+Party.destroy_all
+
+testparty = Party.create(name: "testing")
+
+alivebob = testparty.add_party_member("alivebob")
+alivebob.update(dnd_class: DndClass.find_by(name: "cleric"))
+
+bob = testparty.add_party_member("bob")
+bob.update(current_hp:  0)
+bob.update(alive: false)
+
+
+#############delete me#####
+
 prompt
+
