@@ -283,6 +283,11 @@ def credits(party)
 
 end
 
+## everytime we hit troll he hits a random party member
+## impliment heal in combat 
+## bonus -- trolls death depends on damage type 
+
+
 ######################### start helper methods ##########################
 
 
