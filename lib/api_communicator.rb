@@ -2,11 +2,10 @@ require 'rest-client'
 require 'json'
 require_relative '../config/environment.rb'
 require 'pry'
-require_relative "spell.rb"
-require_relative "dnd_class.rb"
-require_relative "party.rb"
-require_relative "party_member.rb"
-require_relative "test.rb"
+require_relative "../app/models/spell.rb"
+require_relative "../app/models/dnd_class.rb"
+require_relative "../app/models/party.rb"
+require_relative "../app/models/party_member.rb"
 
 
 
@@ -70,10 +69,10 @@ def spells_parser(array_of_spell_hashes)
             end
 
             if spell_hash["classes"].any? {|c| c["name"] == "Wizard"} 
-                wiz = DNDClass.find_by(name: "wizard")
+                wiz = DndClass.find_by(name: "wizard")
                 t.dnd_class_id = wiz.id
             elsif spell_hash["classes"].any? {|c| c["name"] == "Cleric"}
-                healzz = DNDClass.find_by(name: "cleric")
+                healzz = DndClass.find_by(name: "cleric")
                 t.dnd_class_id = healzz.id
             end
             
@@ -83,9 +82,11 @@ def spells_parser(array_of_spell_hashes)
     #binding.pry 
 end
 
-spells_urls = main_spider(collection(ROOT_URL + SPELL_URL))
-new_shit = spells_parser(secondary_spider(spells_urls))
-
+def load_api
+    #run only once from the rake console if your database is not populated
+    spells_urls = main_spider(collection(ROOT_URL + SPELL_URL))
+    new_shit = spells_parser(secondary_spider(spells_urls))
+end
 
 #finished the spell table 
 #and have to start on relations and fleshing out other tables 
