@@ -1,5 +1,5 @@
 require_relative '../../config/environment.rb'
-require 'pry'
+#require 'pry'
 
 require_relative "dnd_class.rb"
 require_relative "party.rb"

@@ -7,7 +7,7 @@ class CreatePartyMembers < ActiveRecord::Migration[6.0]
       t.integer :current_hp
       t.integer :max_hp
       t.integer :level
-      t.boolean :alive?
+      t.boolean :alive
     end
   end
 end
