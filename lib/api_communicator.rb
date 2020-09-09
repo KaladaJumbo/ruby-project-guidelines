@@ -70,6 +70,9 @@ def spells_parser(array_of_spell_hashes)
 
                 t.min_damage = damage[0].to_i
                 t.max_damage = damage[0].to_i * damage[1].to_i
+                if t.max_damage < t.min_damage
+                    t.max_damage = t.min_damage
+                end
 
                 if spell_hash["damage"]["damage_type"]
 

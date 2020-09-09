@@ -21,6 +21,7 @@ testparty = Party.create(name: "testing")
 
 alivebob = testparty.add_party_member("alivebob")
 alivebob.update(dnd_class: DndClass.find_by(name: "cleric"))
+alivebob.update(current_hp: 1)
 
 bob = testparty.add_party_member("bob")
 bob.update(current_hp:  0)
