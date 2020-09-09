@@ -44,13 +44,13 @@ end
 
 def start_game(party)
     clear_screen
-    puts "Welcome to <insert_pub_name>, #{party.name.titlecase}!\n"
+    puts "Welcome to <insert_pub_name>, #{party.name.titlecase}!\n\n"
     game(party)
 end
 
 def game(party)
     #system "clear" || system "cls"
-    puts "\nMenu:"
+    puts "Menu:"
     puts "1 - Add Party Member"
     puts "2 - Heal Party"
     puts "3 - Bury Dead Member"
@@ -77,7 +77,7 @@ def game(party)
         #exit
     else
         clear_screen
-        puts "Invalid response, try again.\n"
+        puts "Invalid response, try again.\n\n"
         game(party)
     end
             
@@ -93,39 +93,52 @@ def new_party_member(party)
         clear_screen # clears return value
         puts "Congratulations! #{guy.name} has joined the party!"
         if space != 0
-            puts "Your party can have up to #{space} more members.\n"
+            puts "Your party can have up to #{space} more members.\n\n"
         else
-            puts "Your party is now full.\n"
+            puts "Your party is now full.\n\n"
         end
     else
-        puts "\nYour party is full.\n"
+        clear_screen
+        puts "\nYour party is full.\n\n"
     end
     game(party)
 end
 
 def view_party(party)
     clear_screen
+    #puts "#{party.name.titlecase}:"
     party.party_members.each { |member|
-        puts "#{member.name}\t\tLevel #{member.level} #{member.dnd_class.name.capitalize}\t\tCurrent HP: #{member.current_hp}"
+        dead = ""
+        if !member.alive
+            dead = "*DEAD*"
+        end
+        puts "#{member.name}\t\tLevel #{member.level} #{member.dnd_class.name.capitalize}\t\tHP: #{member.current_hp}/#{member.max_hp} #{dead}"
     }
-    puts "\n"
+    print "\n\nPress #{localization} to return to menu. "
+    gets.chomp
+    clear_screen
+    game(party)
 end
 
 def heal_party(party)
-    if party_has_cleric?
+    if party_has_cleric?(party)
         party.party_members.each { |member|
             member.current_hp = member.max_hp
         }
+        clear_screen
         message = Spell.find_by(name: "Mass Cure Wounds").description
-        puts message
+        message.split(".").each { |line|
+        puts line + "."
+        }
+        puts "\n"
     else
-        puts "Your party has no Cleric!"
+        puts "\nYour party has no Cleric!\n\n"
     end
     game(party)
 end
 
-def party_has_cleric?
-    Party.party_members.any? { |member|
+def party_has_cleric?(party)
+    party.party_members.any? { |member|
         member.dnd_class == DndClass.find_by(name: "cleric")
     }
 end
@@ -136,5 +149,13 @@ def clear_screen
     else
         system 'clear'
     end    
+end
+
+def localization
+    if Gem.win_platform?
+        "'enter'"
+    else
+        "'return'"
+    end  
 end
 
