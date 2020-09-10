@@ -36,6 +36,7 @@ GEM
     rack (2.2.3)
     rack-protection (2.1.0)
       rack
+    rainbow (3.0.0)
     require_all (3.0.0)
     rest-client (2.1.0)
       http-accept (>= 1.7.0, < 2.0)
@@ -67,10 +68,11 @@ PLATFORMS
 DEPENDENCIES
   json
   pry
+  rainbow
   require_all
   rest-client
   sinatra-activerecord
   sqlite3
 
 BUNDLED WITH
-   2.0.1
+   2.1.4

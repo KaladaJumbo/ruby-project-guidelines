@@ -1,13 +1,15 @@
+require 'rainbow'
+
 def prompt
     clear_screen
-    puts "In a world... somethingsomethingsomething...
-    Defeat the Troll.\n\n"
+    puts Rainbow("In a world... somethingsomethingsomething...
+    Defeat the Troll.\n\n").tomato 
     create_party
 end
 
 def create_party
-    puts "1 - Load Game"
-    puts "2 - New Game\n\n"
+    puts ("1 - ") + Rainbow("Load Game").thistle
+    puts "2 - " + Rainbow("New Game\n\n").aqua
     response = gets.chomp
     if response == "1"
         load_game
@@ -29,14 +31,14 @@ end
 
 def load_game
     clear_screen
-    puts "\nWhat is your party's name?"
+    puts Rainbow("\nWhat is your party's name?").tomato
     Party.all.each { |party|
-        puts party.name
+        puts Rainbow(party.name).tomato
     }
     response = gets.chomp
     party = Party.find_by(name: response)
     if party == nil
-        puts "Party not found"
+        puts Rainbow("Party not found").tomato
         create_party
     else
         start_game(party)
@@ -52,12 +54,12 @@ end
 def game(party)
     #system "clear" || system "cls"
     puts "Menu:"
-    puts "1 - Add Party Member"
-    puts "2 - Heal Party"
-    puts "3 - Bury Dead Member"
-    puts "4 - Fight Monsters"
-    puts "5 - View Party Members"
-    puts "6 - Exit\n\n"
+    puts "1 - " + Rainbow("Add").salmon + "\t\t Party Member"
+    puts "2 - " + Rainbow("Heal").green + "\t Party"
+    puts "3 - " + Rainbow("Bury").teal + "\t Dead Member"
+    puts "4 - " + Rainbow("Fight").floralwhite + "\t Monsters"
+    puts "5 - " + Rainbow("View").darkkhaki + "\t Party Members"
+    puts "6 - " + Rainbow("Exit\n\n").red
     response = gets.chomp
 
     clear_screen
