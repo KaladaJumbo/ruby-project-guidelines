@@ -15,22 +15,22 @@ require_relative "cli.rb"
 puts "HELLO WORLD"
 
 ###########delete me ######
-Party.destroy_all
+# Party.destroy_all
 
-testparty = Party.create(name: "testing")
+# testparty = Party.create(name: "testing")
 
-alivebob = testparty.add_party_member("alivebob")
-alivebob.update(dnd_class: DndClass.find_by(name: "cleric"))
-alivebob.update(current_hp: 1)
+# alivebob = testparty.add_party_member("Alivebob")
+# alivebob.update(dnd_class: DndClass.find_by(name: "cleric"))
+# alivebob.update(current_hp: 1)
 
-bob = testparty.add_party_member("bob")
-bob.update(current_hp:  0)
-bob.update(alive: false)
+# bob = testparty.add_party_member("Bob")
+# bob.update(current_hp:  0)
+# bob.update(alive: false)
 
-bobbity = testparty.add_party_member("bobbity")
-harry = testparty.add_party_member("harry")
-batman = testparty.add_party_member("batman")
-robin = testparty.add_party_member("robin")
+# bobbity = testparty.add_party_member("Bobbity")
+# harry = testparty.add_party_member("Harry")
+# batman = testparty.add_party_member("Batman")
+# robin = testparty.add_party_member("Robin")
 
 
 

@@ -3,18 +3,22 @@ require 'rainbow'
 def prompt
     clear_screen
     puts Rainbow("In a world... somethingsomethingsomething...
-    Defeat the Troll.\n\n").tomato 
+    Defeat the Troll.\n").tomato 
     create_party
 end
 
 def create_party
     puts ("1 - ") + Rainbow("Load Game").thistle
-    puts "2 - " + Rainbow("New Game\n\n").aqua
+    puts "2 - " + Rainbow("New Game").aqua
+    puts "3 - " + Rainbow("Exit\n").floralwhite
     response = gets.chomp
     if response == "1"
         load_game
     elsif response == "2"
         new_game
+    elsif response == "3"
+        clear_screen
+        exit
     else
         clear_screen
         puts "Invalid response, try again.\n\n"
@@ -31,10 +35,11 @@ end
 
 def load_game
     clear_screen
-    puts Rainbow("\nWhat is your party's name?").tomato
+    puts Rainbow("What is your party's name?").tomato
     Party.all.each { |party|
         puts Rainbow(party.name).tomato
     }
+    puts "\n"
     response = gets.chomp
     party = Party.find_by(name: response)
     if party == nil
@@ -57,9 +62,9 @@ def game(party)
     puts "1 - " + Rainbow("Add").salmon + "\t\t Party Member"
     puts "2 - " + Rainbow("Heal").green + "\t Party"
     puts "3 - " + Rainbow("Bury").teal + "\t Dead Member"
-    puts "4 - " + Rainbow("Fight").floralwhite + "\t Monsters"
+    puts "4 - " + Rainbow("Fight").red + "\t Monsters"
     puts "5 - " + Rainbow("View").darkkhaki + "\t Party Members"
-    puts "6 - " + Rainbow("Exit\n\n").red
+    puts "6 - " + Rainbow("Exit\n").floralwhite
     response = gets.chomp
 
     clear_screen
@@ -77,17 +82,23 @@ def game(party)
     when "4"
         #fight troll
         troll_hp = 100
-
-        puts "you walk towards a field and out of a pokeball pops out a troll!!!"
-        puts "you and your party have no pokeballs so your" 
-        puts "only option is to fight"
-
+        clear_screen
+        digits = rand(1..2)
+        if digits == 1
+            puts Rainbow("You walk towards a field and out of a pokeball pops a troll!!!\n").darkseagreen
+            puts Rainbow("You and your party have no pokeballs so your only option is to fight.").darkseagreen
+        else
+            puts Rainbow("As you walk through the valley of the shadow of death...").darkseagreen
+            puts Rainbow("\t...something wicked this way comes.").darkseagreen
+        end
+        game_wait
         fight_troll(party, troll_hp)
     when "5"
         #view party
         view_party(party)
     when "6"
         #exit
+        exit
     else
         clear_screen
         puts "Invalid response, try again.\n\n"
@@ -101,6 +112,11 @@ def new_party_member(party)
         clear_screen
         puts "What is your new party member's name?\n\n"
         response = gets.chomp.capitalize
+        until response.size <= 15
+            puts "\nToo long. Names cannot be more than 15 characters."
+            puts "What is your new party member's name?\n\n"
+            response = gets.chomp.capitalize
+        end
         guy = party.add_party_member(response)
         space = 6 - party.party_members.count
         clear_screen # clears return value
@@ -112,7 +128,7 @@ def new_party_member(party)
         end
     else
         clear_screen
-        puts "\nYour party is full.\n\n"
+        puts "Your party is full.\n\n"
     end
     game(party)
 end
@@ -121,10 +137,22 @@ def print_party(party)
 
     party.party_members.each { |member|
         dead = ""
-        if !member.alive
-            dead = "\t*DEAD*"
+        hp_display = Rainbow("#{member.current_hp}/#{member.max_hp}").green
+        if member.current_hp != member.max_hp
+            hp_display = Rainbow(hp_display).goldenrod
         end
-        puts "#{tabation(member.name)}Level #{member.level} #{member.dnd_class.name.capitalize}\t\t\tHP: #{member.current_hp}/#{member.max_hp} #{dead}"
+        if !member.alive
+            dead = Rainbow(" \t*DEAD*").red
+            hp_display = Rainbow(hp_display).red
+        end
+        member_class = member.dnd_class.name.capitalize
+        if member_class == "Wizard"
+            member_class = Rainbow(member_class).cyan
+        else
+            member_class = Rainbow(member_class).olivedrab
+        end
+
+        puts "#{tabation(member.name)}Level #{member.level} #{member_class}\t\t\tHP: " + hp_display + "#{dead}"
     }
 
 end
@@ -132,7 +160,7 @@ end
 def view_party(party)
     print_party(party)
     clear_screen
-    #puts "#{party.name.titlecase}:"
+    puts "#{party.name.titlecase}:\n\n"
     print_party(party)
 
     game_wait
@@ -150,10 +178,10 @@ def heal_party(party)
             end
         }
         party = updated_party(party)
-        clear_screen
         message = Spell.find_by(name: "Mass Cure Wounds").description
+        clear_screen
         message.split(".").each { |line|
-        puts line + "."
+            puts line + "."
         }
         puts "\n"
     else
@@ -169,34 +197,36 @@ def party_has_cleric?(party)
 end
 
 def bury_dead(party)
+    print_party(party)
     clear_screen
     puts "Sorry for your loss... get good scrub\n\n"
-    puts "please enter name of dead party member you wish to bury:\n"
+    puts "Please enter the name of dead party member you wish to bury:\n"
 
     print_party(party)
 
     puts ""
     response = gets.chomp
-    dead_member = party.party_members.find_by(name: response)
+    dead_member = party.party_members.find_by(name: response.capitalize)
 
 
     if dead_member
+        dead_name = dead_member.name.dup
 
         if !dead_member.alive && dead_member.party == party
             dead_member.destroy
             party = updated_party(party) 
             clear_screen
-            puts "sad song ... \n\n"
+            puts "sad song ... poor #{dead_name}\n\n"
         elsif dead_member
             clear_screen
-            puts "this person is not dead yet you sick ..... yeah\n\n"
+            puts "#{dead_name.capitalize} is not dead... yet.\n\n"
 
         end
 
     else
 
         clear_screen
-        puts "invalid input.\n\n"
+        puts "Invalid input.\n\n"
 
     end
 
@@ -212,9 +242,9 @@ def fight_troll(party, troll_hp)
         
         puts "Troll HP:\t#{troll_hp}/100\n\n"
         puts "Menu:"
-        puts "1 - Attack"
-        puts "2 - Run!!! you coward"
-        puts "5 - View Party Members"
+        puts "1 - " + Rainbow("Attack").tomato
+        puts "2 - " + Rainbow("Run!!!").darkgoldenrod + "\tyou coward"
+        puts "5 - " + Rainbow("View").darkkhaki + "\tParty Members\n\n"
 
         response = gets.chomp
 
@@ -236,8 +266,10 @@ def fight_troll(party, troll_hp)
 
     when "2"
             clear_screen
-            puts "\nyou ran ... your cow watches you in shame\n"
+            puts "You ran... your cow watches you in shame.\n\n"
+            game_wait
     when "5"
+        print_party(party)
         clear_screen
         print_party(party)
         game_wait
@@ -247,11 +279,12 @@ def fight_troll(party, troll_hp)
     end
         
         party = updated_party(party)
+        clear_screen
         game(party)
        
     else
         clear_screen
-        puts "congrats you win ... now like and subscribe and smash that bell!!"
+        #puts "congrats you win ... now like and subscribe and smash that bell!!" # doesn't trigger anyway
         credits(party)
     end
 
@@ -288,15 +321,16 @@ def wiped_party(party)
 
     print_party(party)
     clear_screen
-    puts "everyone has died ... "
-    puts ""
-    puts "the troll knew you were a scrub from the moment he laid eyes on you.... "
-    puts ".... look at the fools as their body lay on the floor...."
+    puts Rainbow("Everyone has died...\n\n").tomato
+    puts "The troll knew you were a scrub from the moment he laid eyes on you..."
+    puts ".... look at the fools as their bodies lay on the floor...."
     puts ".... LOOK AT THEM!!!!!!"
     puts ""
 
     print_party(party) #losscredits??
-    game_wait
+    gets
+    Party.destroy(party.id)
+    clear_screen
     exit
 
 end
@@ -309,33 +343,33 @@ def troll_attack(party, troll_hp) #returns party
 
         clear_screen
         puts "\n\n\n"
-        puts "you got me ..... ugh ... tell my trolls"
-        puts "I... I... ugh... x_x .."
+        puts "You got me... ugh... tell my trolls..."
+        puts "I... I... ugh... x_x ....."
         puts ""
-        puts "                     #"
-        puts "                    ###"
-        puts "                   #####"
-        puts "                  ########"
-        puts "                 ##########"
-        puts "                #############"
-        puts "              #################"
-        puts "             ###################"
-        puts "           #######################"
-        puts "         ############################"
-        puts "       ################################"
-        puts "     ####################################"
-        puts "   #######______#############______#######"
-        puts "  #########|################################"
-        puts " ##########|####################|############"
-        puts " ##########|####################|############"
-        puts " ############################################"
-        puts " ############################################"
-        puts " ###########____________________#############"
-        puts "  #########|###################||###########"
-        puts "   ########|###################||##########"
-        puts "    ###########################||#########"
-        puts "       ########################||######"
-        puts "                               ||"
+        puts Rainbow("                             #
+                            ###
+                           #####
+                          ########
+                         ##########
+                        #############
+                      #################
+                     ###################
+                   #######################
+                 ############################
+               ################################
+             ####################################
+           #######______#############______#######
+          #########").limegreen + Rainbow("|").red + Rainbow("################################
+         ##########").limegreen + Rainbow("|").red + Rainbow("####################").limegreen + Rainbow("|").red + Rainbow("############
+         ##########").limegreen + Rainbow("|").red + Rainbow("####################").limegreen + Rainbow("|").red + Rainbow("############
+         ############################################
+         ############################################
+         ###########____________________#############
+          #########").limegreen + Rainbow("|").red + Rainbow("###################").limegreen + Rainbow("||").red + Rainbow("###########
+           ########").limegreen + Rainbow("|").red + Rainbow("###################").limegreen + Rainbow("||").red + Rainbow("##########
+            ###########################").limegreen + Rainbow("||").red + Rainbow("#########
+               ########################").limegreen + Rainbow("||").red + Rainbow("######
+                                       ").limegreen + Rainbow("||").red
 
         game_wait
         return party
@@ -353,10 +387,6 @@ def troll_attack(party, troll_hp) #returns party
 
         clear_screen
 
-        rando_quote = ["nice one", "ugh", "my turn", "weak..", "take this", "...", "thats all you got?", "pikachu .. quick attack"].sample
-
-        puts "\t\t#{rando_quote}"
-
         party = rando_takes_damage(party)
 
     end
@@ -369,12 +399,56 @@ def cast_spell(rando_spell, rando)
 
     clear_screen
     puts rando_spell.description
+
     damage = rand(rando_spell.min_damage..rando_spell.max_damage)
+    spell_name = rando_spell.name
     damage_type = rando_spell.damage_type
+
     if damage_type == nil
         damage_type = ""
-    end 
-    puts "\n#{rando.name.capitalize}'s #{rando_spell.name} hit the troll for #{damage} #{damage_type.downcase} damage"
+        damage_type_string = ""
+    else
+        damage_type_string = " " + damage_type
+    end
+
+    case damage_type.downcase
+    when "poison"
+        spell_name = Rainbow(spell_name).lime
+        damage_type_string = Rainbow(damage_type_string).lime
+    when "acid"
+        spell_name = Rainbow(spell_name).lime
+        damage_type_string = Rainbow(damage_type_string).lime
+    when "fire"
+        spell_name = Rainbow(spell_name).red
+        damage_type_string = Rainbow(damage_type_string).red
+    when "radiant"
+        spell_name = Rainbow(spell_name).goldenrod
+        damage_type_string = Rainbow(damage_type_string).goldenrod
+    when "cold"
+        spell_name = Rainbow(spell_name).cyan
+        damage_type_string = Rainbow(damage_type_string).cyan
+    when "force"
+        spell_name = Rainbow(spell_name).violet
+        damage_type_string = Rainbow(damage_type_string).violet
+    when "necrotic"
+        spell_name = Rainbow(spell_name).darkviolet
+        damage_type_string = Rainbow(damage_type_string).darkviolet
+    when "psychic"
+        spell_name = Rainbow(spell_name).darkviolet
+        damage_type_string = Rainbow(damage_type_string).darkviolet
+    when "lightning"
+        spell_name = Rainbow(spell_name).gold
+        damage_type_string = Rainbow(damage_type_string).gold
+    when "thunder"
+        spell_name = Rainbow(spell_name).gold
+        damage_type_string = Rainbow(damage_type_string).gold
+    else
+        spell_name = Rainbow(spell_name).tomato
+        damage_type_string = Rainbow(damage_type_string).tomato
+    end
+
+
+    puts "\n#{rando.name.capitalize}'s #{spell_name} hit the troll for #{damage}#{damage_type_string.downcase} damage."
     game_wait
     return [damage, damage_type.downcase]
 
@@ -388,18 +462,17 @@ def credits(party)
     clear_screen
     print_party(party)
     clear_screen
-    puts "you find epic loot from the trools corps!!"
-    puts "it is ....... trolls blood!!!! and epic loin cloth!!!"
-    puts "Thank you for playing"
+    puts "You find " + Rainbow("epic").darkviolet + " loot on the troll's corpse!!"
+    puts "It is ....... trollsblood!!!! and an epic loin cloth!!!\n"
+    puts "Thank you for playing."
     puts ""
-    puts "these are the people who made this possible:"
+    puts "These are the people who made this possible:"
     print_party(party)
+    puts "\n\n"
     gets
     exit
 
 end
-
-## bonus -- trolls death depends on damage type 
 
 
 ######################### start helper methods ##########################
@@ -416,7 +489,7 @@ end
 
 def rando_takes_damage(party) #returns false if party member survies and false otherwise
 
-    rando = party.party_members.where("alive == true").sample
+    rando = party.party_members.where(alive: true).sample
     rando_damage_taken = rand(1..20)
     c_hp = rando.current_hp - rando_damage_taken
     if c_hp < 0 
@@ -424,16 +497,17 @@ def rando_takes_damage(party) #returns false if party member survies and false o
     end
     rando.update(current_hp: c_hp)
     party = updated_party(party)
+
+    rando_quote = ["Nice one...", "Ugh...", "My turn.", "Weak...", "Take this!", ".....", "That's all you got?", "Pikachu... quick attack."].sample
+    
     clear_screen
-    puts ""
-    puts "#{rando.name.capitalize} has taken #{rando_damage_taken} Reddit damage..."
-    puts ""
+    puts "\t\t" + Rainbow(rando_quote).darkseagreen + "\n\n\n"
+    puts "#{rando.name.capitalize} has taken #{rando_damage_taken} " + Rainbow("reddit").darkseagreen + " damage...\n"
 
     if rando.current_hp < 1
 
-        puts ""
-        puts "#{rando.name.capitalize} has died ......"
-        puts "they were trash anyway... one less mouth to feed"
+        puts "\n#{rando.name.capitalize} has " + Rainbow("died").red + "..."
+        puts "They were trash anyway... one less mouth to feed."
         game_wait
         rando.update(alive: false)
         party = updated_party(party)
@@ -455,7 +529,7 @@ end
 
 def game_wait
 
-    print "\n\nPress #{localization} to continue..."
+    print "\n\nPress #{localization} to continue... "
     gets
     clear_screen
 
@@ -473,15 +547,15 @@ def troll_hint
 
     puts "Troll HP:\t1/100"
     puts ""
-    puts "ha!... you will never kill me with those puny attacks...."
+    puts "Ha!... you will never kill me with those puny attacks...."
     puts "only certain elements can kill me ... "
-    puts "if you dont have Acid, Poison, or Fire"
-    puts "its best if you just lie down and let me touch you...consentually.. ofc"
+    puts "if you dont have " + Rainbow("Acid").lime + ", " + Rainbow("Poison").lime + ", or "+ Rainbow("Fire").red
+    puts "it's best if you just lie down and let me touch you...consensually.. ofc"
     puts ""
     puts "MUAHAHAHAHAHAHAHA *coughs* UAHAHAHAHAHAHAHAHA"
     puts 
     puts "ROAR!"
-    puts "get ready got pay the troll toll"
+    puts "get ready to pay the troll toll"
     game_wait
 
 end
