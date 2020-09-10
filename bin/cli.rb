@@ -269,8 +269,16 @@ def attack(party, troll_hp)
 
     end
     
-
-    troll_hp -= cast_spell(castable.sample, rando)
+    cast_spell_info = cast_spell(castable.sample, rando)
+    
+    if cast_spell_info[0] >= troll_hp && lethal?(cast_spell_info[1])
+        troll_hp = 0
+    elsif cast_spell_info[0] >= troll_hp && !lethal?(cast_spell_info[1])
+        troll_hp = 1
+    else
+        troll_hp -= cast_spell_info[0]
+    end
+        
 
 end
 
@@ -330,21 +338,13 @@ def troll_attack(party, troll_hp) #returns party
         game_wait
         return party
 
-    elsif troll_hp = 1
-
-         party = rando_takes_damage(party)
+    elsif troll_hp == 1
 
         clear_screen
-        puts "ha!... you will never kill me with those puny attacks...."
-        puts "only certain elements can kill me ... "
-        puts "if you dont have Acid, Poison, Fire, or Radiant"
-        puts "its best if you just lie down and let me touch you...consentually.. ofc"
-        puts ""
-        puts "MUAHAHAHAHAHAHAHA *coughs* UAHAHAHAHAHAHAHAHA"
-        puts 
-        puts "ROAR!"
-        puts "get ready got pay the troll toll"
+        troll_hint
 
+        party = rando_takes_damage(party)
+        
         return party 
 
     else
@@ -374,7 +374,7 @@ def cast_spell(rando_spell, rando)
     end 
     puts "\n#{rando.name.capitalize}'s #{rando_spell.name} hit the troll for #{damage} #{damage_type.downcase} damage"
     game_wait
-    return damage
+    return [damage, damage_type.downcase]
 
 end
 
@@ -397,12 +397,19 @@ def credits(party)
 
 end
 
-## everytime we hit troll he hits a random party member
-## impliment heal in combat 
 ## bonus -- trolls death depends on damage type 
 
 
 ######################### start helper methods ##########################
+
+
+def lethal?(damage_type)
+
+    weakness = ["poison", "acid", "fire"]
+
+    return weakness.include?(damage_type)
+
+end
 
 
 def rando_takes_damage(party) #returns false if party member survies and false otherwise
@@ -457,6 +464,23 @@ def updated_party(party)
     up_party = Party.find(party.id)
 
     return up_party
+
+end
+
+def troll_hint
+
+    puts "Troll HP:\t1/100"
+    puts ""
+    puts "ha!... you will never kill me with those puny attacks...."
+    puts "only certain elements can kill me ... "
+    puts "if you dont have Acid, Poison, or Fire"
+    puts "its best if you just lie down and let me touch you...consentually.. ofc"
+    puts ""
+    puts "MUAHAHAHAHAHAHAHA *coughs* UAHAHAHAHAHAHAHAHA"
+    puts 
+    puts "ROAR!"
+    puts "get ready got pay the troll toll"
+    game_wait
 
 end
 
