@@ -27,6 +27,12 @@ bob = testparty.add_party_member("bob")
 bob.update(current_hp:  0)
 bob.update(alive: false)
 
+bobbity = testparty.add_party_member("bobbity")
+harry = testparty.add_party_member("harry")
+batman = testparty.add_party_member("batman")
+robin = testparty.add_party_member("robin")
+
+
 
 #############delete me#####
 

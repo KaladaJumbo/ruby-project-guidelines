@@ -60,6 +60,8 @@ def game(party)
     puts "6 - Exit\n\n"
     response = gets.chomp
 
+    clear_screen
+
     case response
     when "1"
         #add party member
@@ -126,9 +128,9 @@ def print_party(party)
 end
 
 def view_party(party)
+    print_party(party)
     clear_screen
     #puts "#{party.name.titlecase}:"
-
     print_party(party)
 
     game_wait
@@ -203,35 +205,50 @@ end
 def fight_troll(party, troll_hp)
     
     clear_screen
+
     if troll_hp > 0
         
         puts "Troll HP:\t#{troll_hp}/100\n\n"
         puts "Menu:"
         puts "1 - Attack"
-        puts "2 - Heal Party member"
-        puts "3 - Run!!! you coward"
+        puts "2 - Run!!! you coward"
+        puts "5 - View Party Members"
 
         response = gets.chomp
 
         case response
         when "1"
-            #attack... random party member cast a random spell within limits 
-        fight_troll(party, attack(party, troll_hp))
+            #attack... random party member cast a random spell within limits
+            
+            troll_hp = attack(party, troll_hp)
+
+            party = troll_attack(party, troll_hp)
+
+            if party.party_members.any?{|member| member.alive == true}
+            
+                fight_troll(party, troll_hp)
+
+            else
+                wiped_party(party)
+            end
+
     when "2"
-        #heal the lowest party member by 10
-            heal(party)
-            fight_troll(party, troll_hp)
-        when "3"
             clear_screen
             puts "\nyou ran ... your cow watches you in shame\n"
-        else
-            fight_troll(party, troll_hp)
-        end
+    when "5"
+        clear_screen
+        print_party(party)
+        game_wait
+        fight_troll(party, troll_hp)
+    else
+        fight_troll(party, troll_hp)
+    end
         
         party = updated_party(party)
         game(party)
        
     else
+        clear_screen
         puts "congrats you win ... now like and subscribe and smash that bell!!"
         credits(party)
     end
@@ -256,6 +273,96 @@ def attack(party, troll_hp)
     troll_hp -= cast_spell(castable.sample, rando)
 
 end
+
+def wiped_party(party)
+
+    print_party(party)
+    clear_screen
+    puts "everyone has died ... "
+    puts ""
+    puts "the troll knew you were a scrub from the moment he laid eyes on you.... "
+    puts ".... look at the fools as their body lay on the floor...."
+    puts ".... LOOK AT THEM!!!!!!"
+    puts ""
+
+    print_party(party) #losscredits??
+    game_wait
+    exit
+
+end
+
+
+def troll_attack(party, troll_hp) #returns party
+
+    
+    if troll_hp < 1
+
+        clear_screen
+        puts "\n\n\n"
+        puts "you got me ..... ugh ... tell my trolls"
+        puts "I... I... ugh... x_x .."
+        puts ""
+        puts "                     #"
+        puts "                    ###"
+        puts "                   #####"
+        puts "                  ########"
+        puts "                 ##########"
+        puts "                #############"
+        puts "              #################"
+        puts "             ###################"
+        puts "           #######################"
+        puts "         ############################"
+        puts "       ################################"
+        puts "     ####################################"
+        puts "   #######______#############______#######"
+        puts "  #########|################################"
+        puts " ##########|####################|############"
+        puts " ##########|####################|############"
+        puts " ############################################"
+        puts " ############################################"
+        puts " ###########____________________#############"
+        puts "  #########|###################||###########"
+        puts "   ########|###################||##########"
+        puts "    ###########################||#########"
+        puts "       ########################||######"
+        puts "                               ||"
+
+        game_wait
+        return party
+
+    elsif troll_hp = 1
+
+         party = rando_takes_damage(party)
+
+        clear_screen
+        puts "ha!... you will never kill me with those puny attacks...."
+        puts "only certain elements can kill me ... "
+        puts "if you dont have Acid, Poison, Fire, or Radiant"
+        puts "its best if you just lie down and let me touch you...consentually.. ofc"
+        puts ""
+        puts "MUAHAHAHAHAHAHAHA *coughs* UAHAHAHAHAHAHAHAHA"
+        puts 
+        puts "ROAR!"
+        puts "get ready got pay the troll toll"
+
+        return party 
+
+    else
+
+        clear_screen
+
+        rando_quote = ["nice one", "ugh", "my turn", "weak..", "take this", "...", "thats all you got?", "pikachu .. quick attack"].sample
+
+        puts "\t\t#{rando_quote}"
+
+        party = rando_takes_damage(party)
+
+    end
+    
+
+end
+
+
 def cast_spell(rando_spell, rando)
 
     clear_screen
@@ -270,12 +377,19 @@ def cast_spell(rando_spell, rando)
     return damage
 
 end
+
+
+
 def credits(party)
 
+    print_party(party)
+    clear_screen
+    print_party(party)
     clear_screen
     puts "you find epic loot from the trools corps!!"
     puts "it is ....... trolls blood!!!! and epic loin cloth!!!"
     puts "Thank you for playing"
+    puts ""
     puts "these are the people who made this possible:"
     print_party(party)
     gets
@@ -291,9 +405,48 @@ end
 ######################### start helper methods ##########################
 
 
+def rando_takes_damage(party) #returns false if party member survies and false otherwise
+
+    rando = party.party_members.where("alive == true").sample
+    rando_damage_taken = rand(1..20)
+    c_hp = rando.current_hp - rando_damage_taken
+    if c_hp < 0 
+        c_hp = 0
+    end
+    rando.update(current_hp: c_hp)
+    party = updated_party(party)
+    clear_screen
+    puts ""
+    puts "#{rando.name.capitalize} has taken #{rando_damage_taken} Reddit damage..."
+    puts ""
+
+    if rando.current_hp < 1
+
+        puts ""
+        puts "#{rando.name.capitalize} has died ......"
+        puts "they were trash anyway... one less mouth to feed"
+        game_wait
+        rando.update(alive: false)
+        party = updated_party(party)
+
+        clear_screen
+        return party
+
+    end
+
+
+    game_wait
+    party = updated_party(party)
+
+    clear_screen
+    return party
+
+end
+
+
 def game_wait
 
-    print "\n\nPress #{localization} to return to menu. "
+    print "\n\nPress #{localization} to continue..."
     gets
     clear_screen
 
