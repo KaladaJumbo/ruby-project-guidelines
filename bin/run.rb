@@ -12,10 +12,12 @@ require_relative "cli.rb"
 
 #binding.pry
 
-puts "HELLO WORLD"
+# puts "HELLO WORLD"
 
-###########delete me ######
+# # ##########delete me ######
 # Party.destroy_all
+# PartyMember.destroy_all
+
 
 # testparty = Party.create(name: "testing")
 

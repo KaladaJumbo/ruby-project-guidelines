@@ -28,7 +28,7 @@ end
 
 def new_game
     print "\nName your party: "
-    response = gets.chomp
+    response = gets.chomp.downcase
     party = Party.create(name: response)
     start_game(party)
 end
@@ -37,10 +37,10 @@ def load_game
     clear_screen
     puts Rainbow("What is your party's name?").tomato
     Party.all.each { |party|
-        puts Rainbow(party.name).tomato
+        puts Rainbow(party.name.capitalize).tomato
     }
     puts "\n"
-    response = gets.chomp
+    response = gets.chomp.downcase
     party = Party.find_by(name: response)
     if party == nil
         puts Rainbow("Party not found").tomato
@@ -152,7 +152,13 @@ def print_party(party)
             member_class = Rainbow(member_class).olivedrab
         end
 
-        puts "#{tabation(member.name)}Level #{member.level} #{member_class}\t\t\tHP: " + hp_display + "#{dead}"
+        level_display = member.level
+
+        if member.level < 10 
+            level_display = "#{level_display} " 
+        end
+
+        puts "#{tabation(member.name)}Level #{level_display} #{member_class}\t\t\tHP: " + hp_display + "#{dead}"
     }
 
 end
@@ -329,6 +335,7 @@ def wiped_party(party)
 
     print_party(party) #losscredits??
     gets
+    party.party_members.each {|member| member.destroy}
     Party.destroy(party.id)
     clear_screen
     exit
@@ -499,10 +506,11 @@ def rando_takes_damage(party) #returns false if party member survies and false o
     party = updated_party(party)
 
     rando_quote = ["Nice one...", "Ugh...", "My turn.", "Weak...", "Take this!", ".....", "That's all you got?", "Pikachu... quick attack."].sample
-    
+    rando_damage_type = ["reddit", "touching", "love", "ruby", "slime", "spoken word", "happiness", "little bit of column A, column B"]
+
     clear_screen
-    puts "\t\t" + Rainbow(rando_quote).darkseagreen + "\n\n\n"
-    puts "#{rando.name.capitalize} has taken #{rando_damage_taken} " + Rainbow("reddit").darkseagreen + " damage...\n"
+    puts "\t\t" + "Troll: " + Rainbow(rando_quote).darkseagreen + "\n\n\n"
+    puts "#{rando.name.capitalize} has taken #{rando_damage_taken} " + Rainbow(rando_damage_type.sample).darkseagreen + " damage...\n"
 
     if rando.current_hp < 1
 
