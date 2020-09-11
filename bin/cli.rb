@@ -112,7 +112,7 @@ def load_game
         clear_screen
         puts "No saved games!"
         game_wait
-        prompt
+        create_party
     else
         clear_screen
         party_list = []
@@ -168,18 +168,24 @@ def game(party)
         bury_dead(party)
     when "4"
         #fight troll
-        troll_hp = 100
-        clear_screen
-        digits = rand(1..2)
-        if digits == 1
-            puts Rainbow("You walk towards a field and out of a pokeball pops a troll!!!\n").darkseagreen
-            puts Rainbow("You and your party have no pokeballs so your only option is to fight.").darkseagreen
+        if party.party_members == []
+            clear_screen
+            puts Rainbow("Get some party members first!\n").tomato
+            game(party)
         else
-            puts Rainbow("As you walk through the valley of the shadow of death...").darkseagreen
-            puts Rainbow("\t...something wicked this way comes.").darkseagreen
+            troll_hp = 100
+            clear_screen
+            digits = rand(1..2)
+            if digits == 1
+                puts Rainbow("You walk towards a field and out of a pokeball pops a troll!!!\n").darkseagreen
+                puts Rainbow("You and your party have no pokeballs so your only option is to fight.").darkseagreen
+            else
+                puts Rainbow("As you walk through the valley of the shadow of death...").darkseagreen
+                puts Rainbow("\t...something wicked this way comes.").darkseagreen
+            end
+            game_wait
+            fight_troll(party, troll_hp)
         end
-        game_wait
-        fight_troll(party, troll_hp)
     when "5"
         #view party
         view_party(party)
