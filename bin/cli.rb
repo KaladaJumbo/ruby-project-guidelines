@@ -29,24 +29,44 @@ end
 def new_game
     print "\nName your party: "
     response = gets.chomp.downcase
-    party = Party.create(name: response)
-    start_game(party)
+    if Party.find_by(name: response)
+        clear_screen
+        puts Rainbow("There is already a party with that name. Be original.\n").tomato
+        create_party
+    else
+        party = Party.create(name: response)
+        start_game(party)
+    end
 end
 
 def load_game
     clear_screen
-    puts Rainbow("What is your party's name?").tomato
-    Party.all.each { |party|
-        puts Rainbow(party.name.capitalize).tomato
-    }
-    puts "\n"
-    response = gets.chomp.downcase
-    party = Party.find_by(name: response)
-    if party == nil
-        puts Rainbow("Party not found").tomato
-        create_party
+    if Party.all == []
+        clear_screen
+        puts "No saved games!"
+        game_wait
+        prompt
     else
-        start_game(party)
+        clear_screen
+        party_list = []
+        Party.all.each { |party|
+            party_list << party.name.capitalize
+        }
+        clear_screen
+        puts Rainbow("What is your party's name?\n").tomato
+        party_list.each { |party|
+            puts party.capitalize
+        }
+        puts "\n"
+        response = gets.chomp.downcase
+        party = Party.find_by(name: response)
+        if party == nil
+            clear_screen
+            puts Rainbow("Party not found\n").tomato
+            create_party
+        else
+            start_game(party)
+        end
     end
 end
 
@@ -119,12 +139,16 @@ def new_party_member(party)
         end
         guy = party.add_party_member(response)
         space = 6 - party.party_members.count
+
+        rando_join_text = ["Congratulations! #{guy.name} has joined the party!", "Wait, you let #{guy.name} join??", "Hey, didn't #{guy.name} die already?", "We're unbeatable with #{guy.name}! Dattebayo!", "Wait, isn't #{guy.name} a level #{guy.level} #{guy.dnd_class.name}??", "Wow, now we have a level #{guy.level}...", "Yet another #{guy.dnd_class.name}...", "#{guy.name.capitalize} bought me some drinks so I let them join.", "Oh shit wuddup #{guy.name}?"]
+
         clear_screen # clears return value
-        puts "Congratulations! #{guy.name} has joined the party!"
+        puts rando_join_text.sample
+        puts ""
         if space != 0
-            puts "Your party can have up to #{space} more members.\n\n"
+            puts "Your party can have up to " + Rainbow(space).tomato + " more members.\n\n"
         else
-            puts "Your party is now full.\n\n"
+            puts Rainbow("Your party is now full.\n").tomato
         end
     else
         clear_screen
@@ -186,12 +210,16 @@ def heal_party(party)
         party = updated_party(party)
         message = Spell.find_by(name: "Mass Cure Wounds").description
         clear_screen
-        message.split(".").each { |line|
-            puts line + "."
+        message.split(". ").each { |line|
+            if line[-1] != "."
+                line = line + "."
+            end
+            puts line
         }
         puts "\n"
     else
-        puts "\nYour party has no Cleric!\n\n"
+        clear_screen
+        puts Rainbow("Your party has no Cleric!\n\n").tomato
     end
     game(party)
 end
@@ -206,11 +234,11 @@ def bury_dead(party)
     print_party(party)
     clear_screen
     puts "Sorry for your loss... get good scrub\n\n"
-    puts "Please enter the name of dead party member you wish to bury:\n"
-
+    
     print_party(party)
-
+    
     puts ""
+    print "Please enter the name of dead party member you wish to bury: "
     response = gets.chomp
     dead_member = party.party_members.find_by(name: response.capitalize)
 
@@ -222,7 +250,10 @@ def bury_dead(party)
             dead_member.destroy
             party = updated_party(party) 
             clear_screen
-            puts "sad song ... poor #{dead_name}\n\n"
+
+            rando_eulogy = ["sad song ... poor ", "Eh, I never liked ", "Check their shoes before you bury ", "You were dead to me already, ", "It's a shame the pokecenter can't heal ", "Never forget our fallen comrade, ", "RIP "]
+
+            puts rando_eulogy.sample + dead_name + "\n\n"
         elsif dead_member
             clear_screen
             puts "#{dead_name.capitalize} is not dead... yet.\n\n"
@@ -246,7 +277,20 @@ def fight_troll(party, troll_hp)
 
     if troll_hp > 0
         
-        puts "Troll HP:\t#{troll_hp}/100\n\n"
+        troll_hp_text = Rainbow(troll_hp.to_s + "/100").darkseagreen
+
+        case troll_hp
+        when 20..99
+            troll_hp_text = Rainbow(troll_hp_text).goldenrod
+        when 2..19
+            troll_hp_text = Rainbow(troll_hp_text).red
+        when 1
+            troll_hp_text = Rainbow(troll_hp_text).fuchsia
+        else
+            troll_hp_text = Rainbow(troll_hp_text).darkseagreen
+        end
+
+        puts "Troll HP:\t#{troll_hp_text}\n\n"
         puts "Menu:"
         puts "1 - " + Rainbow("Attack").tomato
         puts "2 - " + Rainbow("Run!!!").darkgoldenrod + "\tyou coward"
@@ -553,7 +597,7 @@ end
 
 def troll_hint
 
-    puts "Troll HP:\t1/100"
+    puts "Troll HP:\t" + Rainbow("1/100").fuchsia
     puts ""
     puts "Ha!... you will never kill me with those puny attacks...."
     puts "only certain elements can kill me ... "

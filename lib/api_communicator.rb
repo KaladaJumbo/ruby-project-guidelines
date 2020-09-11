@@ -110,7 +110,7 @@ def load_api
         new_shit = spells_parser(secondary_spider(spells_urls))
 
     else
-        puts "-- ERROR -- database still populated"
+        puts "\n-- ERROR -- database still populated"
         puts "run destroy_all on SPELL database"
     end
 
