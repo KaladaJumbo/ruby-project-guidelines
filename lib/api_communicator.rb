@@ -111,7 +111,7 @@ def load_api
 
     else
         puts "-- ERROR -- database still populated"
-        puts "run destory_all on SPELL database"
+        puts "run destroy_all on SPELL database"
     end
 
 end
