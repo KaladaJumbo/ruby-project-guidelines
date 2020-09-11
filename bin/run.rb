@@ -22,7 +22,7 @@ require_relative "cli.rb"
 # testparty = Party.create(name: "testing")
 
 # alivebob = testparty.add_party_member("Alivebob")
-# alivebob.update(dnd_class: DndClass.find_by(name: "cleric"))
+# alivebob.update(dnd_class: DndClass.find_by(name: "wizard"))
 # alivebob.update(current_hp: 1)
 
 # bob = testparty.add_party_member("Bob")
@@ -30,9 +30,13 @@ require_relative "cli.rb"
 # bob.update(alive: false)
 
 # bobbity = testparty.add_party_member("Bobbity")
+# bobbity.update(dnd_class: DndClass.find_by(name: "wizard"))
 # harry = testparty.add_party_member("Harry")
+# harry.update(dnd_class: DndClass.find_by(name: "wizard"))
 # batman = testparty.add_party_member("Batman")
+# batman.update(dnd_class: DndClass.find_by(name: "wizard"))
 # robin = testparty.add_party_member("Robin")
+# robin.update(dnd_class: DndClass.find_by(name: "wizard"))
 
 
 
